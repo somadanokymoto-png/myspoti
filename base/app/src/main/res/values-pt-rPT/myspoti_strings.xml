@@ -608,6 +608,7 @@
     <string name="hidden_songs_empty">Nenhuma música oculta. Escolha Sem interesse no menu de uma música.</string>
     <string name="login_failed_title">O início de sessão não foi concluído</string>
     <string name="login_failed_detail">A página do Spotify não carregou ou não arrancou. Verifique a ligação e tente novamente. Se continuar a falhar, experimente outra rede.</string>
+    <string name="login_reset_session">Limpar os dados da sessão e tentar novamente</string>
     <string name="lan_device_detail">Nesta rede</string>
     <string name="lan_logging_in">A iniciar sessão…</string>
     <string name="lan_failed">%1$s não aceitou o início de sessão. Abra-o uma vez com a aplicação Spotify e tente novamente.</string>
