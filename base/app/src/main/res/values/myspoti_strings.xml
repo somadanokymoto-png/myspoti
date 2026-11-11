@@ -646,6 +646,7 @@
     <string name="hidden_songs_empty">No hidden songs yet. Choose Not interested in a song\'s menu.</string>
     <string name="login_failed_title">Sign-in did not finish</string>
     <string name="login_failed_detail">Spotify\'s page did not load or did not start. Check your connection and try again. If it keeps failing, try another network.</string>
+    <string name="login_reset_session">Clear sign-in data and retry</string>
     <string name="lan_device_detail">On this network</string>
     <string name="lan_logging_in">Logging in…</string>
     <string name="lan_failed">%1$s did not accept the login. Open it once with the Spotify app, then try again.</string>
