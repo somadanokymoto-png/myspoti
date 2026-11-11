@@ -18,6 +18,8 @@ defaults:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # this fork's debug build publishes a directly downloadable APK
     steps:
       - uses: actions/checkout@v7
 
@@ -51,14 +53,30 @@ jobs:
 
       - name: Debug APK
         if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleDebug -Pabis=arm64-v8a
 
+      # Non-dev workflows can still expose a ZIP artifact; the Custom preview publishes just the APK.
       - uses: actions/upload-artifact@v7
-        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') && github.ref != 'refs/heads/dev/amoled-login-v1' }}
         with:
           name: myspoti-debug
           path: base/app/build/outputs/apk/debug/*.apk
           retention-days: 14
+
+      - name: Publish direct ARM64 APK (without ZIP)
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev/amoled-login-v1' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          APK="$(find app/build/outputs/apk/debug -maxdepth 1 -type f -name '*.apk' -print -quit)"
+          test -n "$APK" || { echo "::error::Debug APK not produced"; exit 1; }
+          cp "$APK" "$RUNNER_TEMP/Myspoti-Custom-arm64-v8a.apk"
+          gh release create "custom-preview-${GITHUB_RUN_NUMBER}" \
+            "$RUNNER_TEMP/Myspoti-Custom-arm64-v8a.apk" \
+            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --title "Myspoti Custom — teste ${GITHUB_RUN_NUMBER}" \
+            --notes "APK ARM64 direto (sem ZIP). Versão de desenvolvimento: modo convidado visual, paleta AMOLED e recuperação de login. Login Spotify e reprodução ainda exigem validação. Como a assinatura de debug pode mudar entre builds, poderá ser necessário desinstalar a versão de teste anterior." \
+            --prerelease
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
