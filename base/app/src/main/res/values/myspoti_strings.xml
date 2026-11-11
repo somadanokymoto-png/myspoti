@@ -646,6 +646,13 @@
     <string name="hidden_songs_empty">No hidden songs yet. Choose Not interested in a song\'s menu.</string>
     <string name="login_failed_title">Sign-in did not finish</string>
     <string name="login_failed_detail">Spotify\'s page did not load or did not start. Check your connection and try again. If it keeps failing, try another network.</string>
+    <string name="login_provider_blocked_title">%1$s sign-in is blocked here</string>
+    <string name="login_provider_blocked_detail">Google, Facebook and Apple do not allow sign-in inside embedded WebViews. To use your SAME Spotify account and playlists, sign in with its email and Spotify password. If you only use Google, create a Spotify password using that Gmail in your regular browser, then return here. Never enter your Google password in this app.</string>
+    <string name="login_use_spotify_password">Sign in with Spotify email</string>
+    <string name="login_create_spotify_password">Create a Spotify password in browser</string>
+    <string name="login_try_guest">Explore without an account (demo only)</string>
+    <string name="login_browser_missing">No browser available to open Spotify</string>
+    <string name="welcome_google_help">Using Google to sign in? Create a Spotify password</string>
     <string name="login_reset_session">Clear sign-in data and retry</string>
     <string name="lan_device_detail">On this network</string>
     <string name="lan_logging_in">Logging in…</string>
