@@ -45,6 +45,7 @@ import app.myspoti.host.android.SessionWait
 import com.music.spotui.App
 import com.music.spotui.di.AutoBrowser
 import com.music.spotui.ui.screens.WelcomeScreen
+import com.music.spotui.ui.screens.GuestPreviewScreen
 import com.music.spotui.ui.theme.SpotuiTheme
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
@@ -83,6 +84,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var root: FrameLayout
     private var signedIn by mutableStateOf(false)
     private var showingLogin by mutableStateOf(false)
+    /** UI-only demo: no cookies, Spotify API requests or implied authentication. */
+    private var guestPreview by mutableStateOf(false)
     /** Back from Spotify's login, waiting for the session: a native loading screen, not the web page. */
     private var connecting by mutableStateOf(false)
     /** A pending wait for the session to prove itself after the login page came back. */
@@ -141,7 +144,11 @@ class MainActivity : AppCompatActivity() {
                             )
                             signedIn -> if (tv) com.music.spotui.ui.tv.TvApp() else App()
                             connecting -> ConnectingScreen()
-                            else -> WelcomeScreen(onLogin = { showLogin() })
+                            guestPreview -> GuestPreviewScreen(
+                                onExit = { guestPreview = false },
+                                onLogin = { guestPreview = false; showLogin() },
+                            )
+                            else -> WelcomeScreen(onLogin = { showLogin() }, onGuest = { guestPreview = true })
                         }
                         // The sign-in page opening (the app's own screen, never a white page) or not coming (an
                         // error with Try again, never a page that stays blank): over whatever is under it.
