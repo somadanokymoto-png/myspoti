@@ -74,7 +74,7 @@ import kotlin.math.sin
  * the button rise into place one after the other, over a soft green light that drifts.
  */
 @Composable
-fun WelcomeScreen(onLogin: () -> Unit, onGuest: () -> Unit) {
+fun WelcomeScreen(onLogin: () -> Unit, onGuest: () -> Unit, onPasswordHelp: () -> Unit) {
     // One entrance per part, a beat apart: logo, name, features, button.
     val parts = remember { List(4) { Animatable(0f) } }
     LaunchedEffect(Unit) {
@@ -148,6 +148,13 @@ fun WelcomeScreen(onLogin: () -> Unit, onGuest: () -> Unit) {
                         .clickable(onClick = onGuest)
                         .padding(vertical = 14.dp),
                     textAlign = TextAlign.Center,
+                )
+                Text(
+                    stringResource(R.string.welcome_google_help),
+                    color = AppText.copy(alpha = 0.85f), fontFamily = AppSans,
+                    fontSize = 14.sp, textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
+                        .clickable(onClick = onPasswordHelp).padding(vertical = 6.dp),
                 )
                 Text(
                     stringResource(R.string.welcome_privacy),
