@@ -104,6 +104,10 @@ class WebPlayerHost(private val context: Context) : BridgeHost {
     private val _loginError = MutableStateFlow<String?>(null)
     val loginError: StateFlow<String?> = _loginError
 
+    /** External identity providers refuse embedded WebViews. Never navigate credentials there. */
+    private val _blockedIdentityProvider = MutableStateFlow<String?>(null)
+    val blockedIdentityProvider: StateFlow<String?> = _blockedIdentityProvider
+
     /** Fires after each Web Player page load; the API injects the bridge then. */
     var onPageLoaded: (() -> Unit)? = null
 
@@ -446,6 +450,19 @@ class WebPlayerHost(private val context: Context) : BridgeHost {
             }
 
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+                // Google/Facebook/Apple do not accept embedded WebView authentication.
+                // Chrome cannot share its signed-in cookies with the Web Player in this WebView.
+                // Offer an official same-account email/password alternative, not a fake login.
+                val provider = if (request.isForMainFrame && _loginRequired.value)
+                    LoginLoad.embeddedIdentityProvider(request.url.toString()) else null
+                if (provider != null) {
+                    Logbook.log("identity provider not available in embedded WebView: $provider")
+                    _blockedIdentityProvider.value = provider
+                    main.removeCallbacks(loginTimeout)
+                    main.removeCallbacks(loginProbe)
+                    setLoginLoad(LoginLoad.SHOWN)
+                    return true
+                }
                 val host = request.url.host.orEmpty()
                 // Stay on Spotify's own pages (player, login, consent); open nothing else.
                 // Exact or subdomain match: "evilspotify.com" must not count as Spotify.
@@ -815,6 +832,7 @@ class WebPlayerHost(private val context: Context) : BridgeHost {
         main.removeCallbacks(loginTimeout)
         _loginLoad.value = LoginLoad.LOADING
         _loginError.value = null
+        _blockedIdentityProvider.value = null
         view.alpha = 0f
         main.postDelayed(loginTimeout, LoginLoad.TIMEOUT_MS)
         Logbook.log("sign-in page: opening")
