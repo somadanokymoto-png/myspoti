@@ -464,6 +464,9 @@ class WebPlayerHost(private val context: Context) : BridgeHost {
                     // The WebView sits above Compose in the FrameLayout. Without this veil,
                     // the native explanation would be hidden under the Spotify login page.
                     view.alpha = 0f
+                    // Alpha alone does not stop invisible WebViews from stealing touches.
+                    view.visibility = View.INVISIBLE
+                    view.clearFocus()
                     return true
                 }
                 val host = request.url.host.orEmpty()
@@ -836,6 +839,7 @@ class WebPlayerHost(private val context: Context) : BridgeHost {
         _loginLoad.value = LoginLoad.LOADING
         _loginError.value = null
         _blockedIdentityProvider.value = null
+        view.visibility = if (lastVisible) View.VISIBLE else View.INVISIBLE
         view.alpha = 0f
         main.postDelayed(loginTimeout, LoginLoad.TIMEOUT_MS)
         Logbook.log("sign-in page: opening")
@@ -937,7 +941,8 @@ class WebPlayerHost(private val context: Context) : BridgeHost {
         // Still opening or failed, the sign-in page stays out of sight (the app's own screen covers it).
         view.alpha = if (_loginLoad.value == LoginLoad.LOADING || _loginLoad.value == LoginLoad.FAILED ||
             _blockedIdentityProvider.value != null) 0f else 1f
-        view.visibility = if (visible) View.VISIBLE else View.INVISIBLE
+        view.visibility = if (visible && _blockedIdentityProvider.value == null)
+            View.VISIBLE else View.INVISIBLE
         view.importantForAccessibility = if (visible) View.IMPORTANT_FOR_ACCESSIBILITY_AUTO else View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
         // Typing in the login form needs touch focus, or the keyboard never opens.
         view.isFocusable = visible
