@@ -638,6 +638,13 @@
     <string name="hidden_songs_empty">Nenhuma música oculta. Escolha Sem interesse no menu de uma música.</string>
     <string name="login_failed_title">O login não foi concluído</string>
     <string name="login_failed_detail">A página do Spotify não carregou ou não iniciou. Verifique sua conexão e tente novamente. Se continuar falhando, tente outra rede.</string>
+    <string name="login_provider_blocked_title">Login com %1$s bloqueado aqui</string>
+    <string name="login_provider_blocked_detail">Google, Facebook e Apple não permitem login neste navegador interno. Para usar a MESMA conta Spotify e suas playlists, entre com o e-mail e a senha do Spotify. Se usa apenas Google, crie uma senha do Spotify com o mesmo Gmail no navegador do celular e depois volte aqui. Não digite sua senha do Google neste aplicativo.</string>
+    <string name="login_use_spotify_password">Entrar com e-mail do Spotify</string>
+    <string name="login_create_spotify_password">Criar senha do Spotify no navegador</string>
+    <string name="login_try_guest">Explorar sem conta (apenas demonstração)</string>
+    <string name="login_browser_missing">Nenhum navegador disponível para abrir o Spotify</string>
+    <string name="welcome_google_help">Usa Google para entrar? Crie uma senha do Spotify</string>
     <string name="login_reset_session">Limpar os dados de login e tentar novamente</string>
     <string name="lan_device_detail">Nesta rede</string>
     <string name="lan_logging_in">Conectando…</string>
