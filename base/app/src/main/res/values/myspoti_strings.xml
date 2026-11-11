@@ -7,7 +7,7 @@
     <string name="welcome_rotate_clips">with the official videos.</string>
     <string name="welcome_rotate_offline">offline, through extensions.</string>
     <string name="welcome_login">Log in with Spotify</string>
-    <string name="welcome_privacy">You sign in on Spotify\'s own page. Myspoti never sees your password.</string>
+    <string name="welcome_privacy">Spotify sign-in opens in this app\'s isolated WebView. Chrome and the Spotify app do not automatically share their signed-in accounts or cookies with it.</string>
     <string name="remove_from_liked">Remove from Liked Songs</string>
     <string name="repeat_on">Repeat: on</string>
     <string name="repeat_one">Repeat one</string>
