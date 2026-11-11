@@ -11,6 +11,11 @@ on:
 permissions:
   contents: read
 
+# Only the latest development commit needs a test APK; do not waste runners on older pushes.
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
 defaults:
   run:
     working-directory: base
@@ -70,6 +75,11 @@ jobs:
         run: |
           APK="$(find app/build/outputs/apk/debug -maxdepth 1 -type f -name '*.apk' -print -quit)"
           test -n "$APK" || { echo "::error::Debug APK not produced"; exit 1; }
+          LATEST="$(git ls-remote origin refs/heads/dev/amoled-login-v1 | cut -f1)"
+          if [ "$LATEST" != "$GITHUB_SHA" ]; then
+            echo "A newer commit is on the branch; skipping stale APK release"
+            exit 0
+          fi
           cp "$APK" "$RUNNER_TEMP/Myspoti-Custom-arm64-v8a.apk"
           gh release create "custom-preview-${GITHUB_RUN_NUMBER}" \
             "$RUNNER_TEMP/Myspoti-Custom-arm64-v8a.apk" \
