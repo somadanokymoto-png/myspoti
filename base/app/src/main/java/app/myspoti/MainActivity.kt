@@ -148,10 +148,17 @@ class MainActivity : AppCompatActivity() {
                         if (showingLogin) {
                             val load by MyspotiRuntime.host.loginLoad.collectAsState()
                             when {
-                                load == LoginLoad.FAILED || loginProblem -> LoginProblemScreen(onRetry = {
-                                    if (load == LoginLoad.FAILED) MyspotiRuntime.host.retryLogin()
-                                    else { loginProblem = false; MyspotiRuntime.host.openLogin() }
-                                })
+                                load == LoginLoad.FAILED || loginProblem -> LoginProblemScreen(
+                                    onRetry = {
+                                        loginProblem = false
+                                        if (load == LoginLoad.FAILED) MyspotiRuntime.host.retryLoginKeepingSession()
+                                        else MyspotiRuntime.host.openLogin()
+                                    },
+                                    onReset = {
+                                        loginProblem = false
+                                        MyspotiRuntime.host.retryLogin()
+                                    },
+                                )
                                 load == LoginLoad.LOADING -> ConnectingScreen()
                                 // On Spotify's page itself: a way to a diagnostic report (the settings are out of reach).
                                 else -> com.music.spotui.ui.components.LoginHelpButton()
@@ -680,7 +687,7 @@ private fun ConnectingScreen() {
 
 /** The sign-in page did not come (or the player did not start after it): what happened, and a way to go again. */
 @androidx.compose.runtime.Composable
-private fun LoginProblemScreen(onRetry: () -> Unit) {
+private fun LoginProblemScreen(onRetry: () -> Unit, onReset: () -> Unit) {
     Column(
         Modifier.fillMaxSize().background(com.music.spotui.ui.theme.AppBackground).systemBarsPadding().padding(28.dp),
         verticalArrangement = Arrangement.Center,
@@ -698,6 +705,13 @@ private fun LoginProblemScreen(onRetry: () -> Unit) {
             Text(stringResource(R.string.retry_button), color = Color.Black, fontFamily = com.music.spotui.ui.theme.AppSans,
                 fontWeight = FontWeight.Bold, fontSize = 17.sp)
         }
+        Text(
+            stringResource(R.string.login_reset_session),
+            color = com.music.spotui.ui.theme.AppText.copy(alpha = 0.7f),
+            fontFamily = com.music.spotui.ui.theme.AppSans,
+            fontSize = 14.sp,
+            modifier = Modifier.padding(top = 18.dp).clickable(onClick = onReset),
+        )
         com.music.spotui.ui.components.LoginReportLink(Modifier.padding(top = 12.dp))
     }
 }
