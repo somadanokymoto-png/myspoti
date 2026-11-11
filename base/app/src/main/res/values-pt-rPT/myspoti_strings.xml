@@ -7,7 +7,7 @@
     <string name="welcome_rotate_clips">com os clipes oficiais.</string>
     <string name="welcome_rotate_offline">offline, com extensões.</string>
     <string name="welcome_login">Iniciar sessão com o Spotify</string>
-    <string name="welcome_privacy">Inicias sessão na página oficial do Spotify. O Myspoti nunca vê a tua palavra-passe.</string>
+    <string name="welcome_privacy">O início de sessão abre o site do Spotify num navegador interno, sem importar as contas e cookies do Chrome ou da aplicação Spotify.</string>
     <string name="remove_from_liked">Remover das Músicas apreciadas</string>
     <string name="repeat_on">Repetir: ativado</string>
     <string name="repeat_one">Repetir uma</string>
