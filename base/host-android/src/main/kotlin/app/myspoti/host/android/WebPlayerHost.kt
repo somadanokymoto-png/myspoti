@@ -100,6 +100,9 @@ class WebPlayerHost(private val context: Context) : BridgeHost {
     private val _loginLoad = MutableStateFlow(LoginLoad.NONE)
     /** How the sign-in page is opening: the UI covers it while it loads and shows an error if it fails. */
     val loginLoad: StateFlow<LoginLoad> = _loginLoad
+    /** Safe technical failure cause (code/host only; no cookie or URL query) for the sign-in screen. */
+    private val _loginError = MutableStateFlow<String?>(null)
+    val loginError: StateFlow<String?> = _loginError
 
     /** Fires after each Web Player page load; the API injects the bridge then. */
     var onPageLoaded: (() -> Unit)? = null
@@ -811,6 +814,7 @@ class WebPlayerHost(private val context: Context) : BridgeHost {
         main.removeCallbacks(loginProbe)
         main.removeCallbacks(loginTimeout)
         _loginLoad.value = LoginLoad.LOADING
+        _loginError.value = null
         view.alpha = 0f
         main.postDelayed(loginTimeout, LoginLoad.TIMEOUT_MS)
         Logbook.log("sign-in page: opening")
@@ -828,6 +832,7 @@ class WebPlayerHost(private val context: Context) : BridgeHost {
     private fun loginFailed(what: String) {
         if (_loginLoad.value == LoginLoad.FAILED) return
         Logbook.log("sign-in page failed ($what)")
+        _loginError.value = what.take(160)
         runCatching { view.stopLoading() }
         view.alpha = 0f
         setLoginLoad(LoginLoad.FAILED)
