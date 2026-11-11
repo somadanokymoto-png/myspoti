@@ -148,14 +148,30 @@ class MainActivity : AppCompatActivity() {
                                 onExit = { guestPreview = false },
                                 onLogin = { guestPreview = false; showLogin() },
                             )
-                            else -> WelcomeScreen(onLogin = { showLogin() }, onGuest = { guestPreview = true })
+                            else -> WelcomeScreen(
+                                onLogin = { showLogin() },
+                                onGuest = { guestPreview = true },
+                                onPasswordHelp = { openSpotifyPasswordReset() },
+                            )
                         }
                         // The sign-in page opening (the app's own screen, never a white page) or not coming (an
                         // error with Try again, never a page that stays blank): over whatever is under it.
                         if (showingLogin) {
                             val load by MyspotiRuntime.host.loginLoad.collectAsState()
                             val technicalDetail by MyspotiRuntime.host.loginError.collectAsState()
+                            val blockedProvider by MyspotiRuntime.host.blockedIdentityProvider.collectAsState()
                             when {
+                                blockedProvider != null -> ProviderLoginHelpScreen(
+                                    provider = blockedProvider.orEmpty(),
+                                    onEmailLogin = { MyspotiRuntime.host.openLogin() },
+                                    onPasswordHelp = { openSpotifyPasswordReset() },
+                                    onGuest = {
+                                        loginWait?.cancel()
+                                        connecting = false
+                                        hideLogin()
+                                        guestPreview = true
+                                    },
+                                )
                                 load == LoginLoad.FAILED || loginProblem -> LoginProblemScreen(
                                     onRetry = {
                                         loginProblem = false
@@ -403,6 +419,15 @@ class MainActivity : AppCompatActivity() {
         // whole view tree) alive for the rest of the playback session.
         MyspotiRuntime.host.detach(root)
         super.onDestroy()
+    }
+
+    /** Set up a Spotify password in a real browser without reading any credentials. */
+    private fun openSpotifyPasswordReset() {
+        val page = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://www.spotify.com/password-reset"))
+            .addCategory(Intent.CATEGORY_BROWSABLE)
+        runCatching { startActivity(page) }.onFailure {
+            android.widget.Toast.makeText(this, getString(R.string.login_browser_missing), android.widget.Toast.LENGTH_LONG).show()
+        }
     }
 
     /** Spotify's login page, full screen, until the Web Player comes back signed in. */
@@ -697,6 +722,55 @@ private fun ConnectingScreen() {
         androidx.compose.runtime.LaunchedEffect(Unit) { kotlinx.coroutines.delay(12_000); long = true }
         if (long) com.music.spotui.ui.components.LoginReportLink(
             Modifier.align(Alignment.BottomCenter).systemBarsPadding().padding(bottom = 24.dp))
+    }
+}
+
+/**
+ * Google/Facebook/Apple block embedded WebViews; no Chrome OAuth cookie or token is copied
+ * into the Web Player. Spotify recommends email + Spotify password for Google-linked accounts.
+ */
+@androidx.compose.runtime.Composable
+private fun ProviderLoginHelpScreen(
+    provider: String,
+    onEmailLogin: () -> Unit,
+    onPasswordHelp: () -> Unit,
+    onGuest: () -> Unit,
+) {
+    Column(
+        Modifier.fillMaxSize().background(com.music.spotui.ui.theme.AppBackground)
+            .systemBarsPadding().padding(26.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(stringResource(R.string.login_provider_blocked_title, provider),
+            color = com.music.spotui.ui.theme.AppText, fontSize = 23.sp,
+            fontFamily = com.music.spotui.ui.theme.AppSans,
+            fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+        Text(stringResource(R.string.login_provider_blocked_detail),
+            color = com.music.spotui.ui.theme.AppMuted, fontSize = 15.sp,
+            fontFamily = com.music.spotui.ui.theme.AppSans,
+            lineHeight = 22.sp, textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = 13.dp, bottom = 24.dp))
+        Box(
+            modifier = Modifier.fillMaxWidth().height(54.dp)
+                .clip(RoundedCornerShape(50))
+                .background(com.music.spotui.ui.theme.AppAccent)
+                .clickable(onClick = onEmailLogin),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(stringResource(R.string.login_use_spotify_password),
+                fontFamily = com.music.spotui.ui.theme.AppSans, color = Color.Black,
+                fontSize = 15.sp, fontWeight = FontWeight.Bold)
+        }
+        Text(stringResource(R.string.login_create_spotify_password),
+            color = com.music.spotui.ui.theme.AppText,
+            fontFamily = com.music.spotui.ui.theme.AppSans,
+            fontSize = 15.sp, textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = 22.dp).clickable(onClick = onPasswordHelp))
+        Text(stringResource(R.string.login_try_guest),
+            color = com.music.spotui.ui.theme.AppMuted,
+            fontFamily = com.music.spotui.ui.theme.AppSans,
+            fontSize = 14.sp, modifier = Modifier.padding(top = 22.dp).clickable(onClick = onGuest))
     }
 }
 
