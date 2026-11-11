@@ -461,6 +461,9 @@ class WebPlayerHost(private val context: Context) : BridgeHost {
                     main.removeCallbacks(loginTimeout)
                     main.removeCallbacks(loginProbe)
                     setLoginLoad(LoginLoad.SHOWN)
+                    // The WebView sits above Compose in the FrameLayout. Without this veil,
+                    // the native explanation would be hidden under the Spotify login page.
+                    view.alpha = 0f
                     return true
                 }
                 val host = request.url.host.orEmpty()
@@ -842,7 +845,8 @@ class WebPlayerHost(private val context: Context) : BridgeHost {
         if (_loginLoad.value == state) return
         _loginLoad.value = state
         if (state != LoginLoad.LOADING) { main.removeCallbacks(loginProbe); main.removeCallbacks(loginTimeout) }
-        if (state == LoginLoad.SHOWN || state == LoginLoad.NONE) view.alpha = 1f
+        if (state == LoginLoad.SHOWN || state == LoginLoad.NONE)
+            view.alpha = if (_blockedIdentityProvider.value != null) 0f else 1f
         if (state == LoginLoad.NONE) return
         Logbook.log("sign-in page: ${state.name.lowercase()}")
     }
@@ -931,7 +935,8 @@ class WebPlayerHost(private val context: Context) : BridgeHost {
         container.addView(view, ViewGroup.LayoutParams(size, size))
         keepClearOfSystemBars(visible)
         // Still opening or failed, the sign-in page stays out of sight (the app's own screen covers it).
-        view.alpha = if (_loginLoad.value == LoginLoad.LOADING || _loginLoad.value == LoginLoad.FAILED) 0f else 1f
+        view.alpha = if (_loginLoad.value == LoginLoad.LOADING || _loginLoad.value == LoginLoad.FAILED ||
+            _blockedIdentityProvider.value != null) 0f else 1f
         view.visibility = if (visible) View.VISIBLE else View.INVISIBLE
         view.importantForAccessibility = if (visible) View.IMPORTANT_FOR_ACCESSIBILITY_AUTO else View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
         // Typing in the login form needs touch focus, or the keyboard never opens.
