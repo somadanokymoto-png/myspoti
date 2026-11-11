@@ -608,6 +608,13 @@
     <string name="hidden_songs_empty">Nenhuma música oculta. Escolha Sem interesse no menu de uma música.</string>
     <string name="login_failed_title">O início de sessão não foi concluído</string>
     <string name="login_failed_detail">A página do Spotify não carregou ou não arrancou. Verifique a ligação e tente novamente. Se continuar a falhar, experimente outra rede.</string>
+    <string name="login_provider_blocked_title">Início de sessão com %1$s bloqueado</string>
+    <string name="login_provider_blocked_detail">Google, Facebook e Apple não permitem iniciar sessão num WebView. Para usar a MESMA conta Spotify e as suas playlists, entre com o e-mail e a senha do Spotify. Se utiliza apenas Google, crie uma senha do Spotify com o Gmail no navegador do telemóvel e volte aqui. Não introduza a palavra-passe Google nesta aplicação.</string>
+    <string name="login_use_spotify_password">Entrar com o e-mail do Spotify</string>
+    <string name="login_create_spotify_password">Criar senha do Spotify no navegador</string>
+    <string name="login_try_guest">Explorar sem conta (apenas demonstração)</string>
+    <string name="login_browser_missing">Nenhum navegador disponível para abrir o Spotify</string>
+    <string name="welcome_google_help">Usa Google para entrar? Crie uma senha do Spotify</string>
     <string name="login_reset_session">Limpar os dados da sessão e tentar novamente</string>
     <string name="lan_device_detail">Nesta rede</string>
     <string name="lan_logging_in">A iniciar sessão…</string>
