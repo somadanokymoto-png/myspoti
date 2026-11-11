@@ -32,6 +32,16 @@ class LoginLoadTest {
         assertFalse(LoginLoad.isLoginUrl("https://evilfacebook.com/"))
     }
 
+    @Test fun `embedded identity providers need a supported browser`() {
+        assertEquals("Google", LoginLoad.embeddedIdentityProvider("https://accounts.google.com/o/oauth2/v2/auth?state=secret"))
+        assertEquals("Facebook", LoginLoad.embeddedIdentityProvider("https://m.facebook.com/dialog/oauth"))
+        assertEquals("Apple", LoginLoad.embeddedIdentityProvider("https://appleid.apple.com/auth/authorize"))
+        assertEquals(null, LoginLoad.embeddedIdentityProvider("https://accounts.spotify.com/en/login"))
+        assertEquals(null, LoginLoad.embeddedIdentityProvider("https://accounts.google.com.attacker.example/login"))
+        assertEquals(null, LoginLoad.embeddedIdentityProvider("http://accounts.google.com/login"))
+        assertEquals(null, LoginLoad.embeddedIdentityProvider(null))
+    }
+
     @Test fun `nothing and nonsense are not login pages`() {
         assertFalse(LoginLoad.isLoginUrl(null))
         assertFalse(LoginLoad.isLoginUrl(""))
