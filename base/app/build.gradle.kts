@@ -89,8 +89,8 @@ android {
     buildTypes {
         debug {
             // Installs next to the release apps (own data, own sign-in).
-            if (!automixLab) applicationIdSuffix = ".dev"
-            manifestPlaceholders["appLabel"] = if (automixLab) "Myspoti Mix Lab" else "Myspoti dev"
+            if (!automixLab) applicationIdSuffix = ".customdev"
+            manifestPlaceholders["appLabel"] = if (automixLab) "Myspoti Mix Lab" else "Myspoti Custom"
             manifestPlaceholders["cliEnabled"] = "true"
         }
         release {
