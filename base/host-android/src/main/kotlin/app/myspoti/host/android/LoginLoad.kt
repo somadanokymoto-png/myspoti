@@ -68,6 +68,22 @@ enum class LoginLoad {
             return host == "accounts.google.com" || host == "facebook.com" || host.endsWith(".facebook.com") || host == "appleid.apple.com"
         }
 
+        /**
+         * Identity-provider sites block embedded WebViews. Extract the provider label only,
+         * never a query string, credential, account identifier, or redirect parameter.
+         */
+        fun embeddedIdentityProvider(url: String?): String? {
+            val uri = runCatching { java.net.URI(url ?: return null) }.getOrNull() ?: return null
+            if (uri.scheme?.lowercase() != "https") return null
+            val host = uri.host?.lowercase() ?: return null
+            return when {
+                host == "accounts.google.com" -> "Google"
+                host == "facebook.com" || host.endsWith(".facebook.com") -> "Facebook"
+                host == "appleid.apple.com" -> "Apple"
+                else -> null
+            }
+        }
+
         private fun hostOf(url: String?): String? =
             runCatching { java.net.URI((url ?: return null).substringBefore('#').substringBefore('?')).host?.lowercase() }.getOrNull()
     }
