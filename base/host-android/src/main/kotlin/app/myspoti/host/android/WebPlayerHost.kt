@@ -384,10 +384,11 @@ class WebPlayerHost(private val context: Context) : BridgeHost {
                 // ERR_ABORTED: a load this app stopped itself (a timeout, a newer load) — not a failure.
                 if (request.isForMainFrame && request.url.host == PLAYER_HOST && "ERR_ABORTED" !in error.description.toString())
                     playerPageFailed("load error ${error.errorCode}")
-                // The sign-in page itself: the WebView's own error page is not something to leave a user on.
-                if (request.isForMainFrame && _loginLoad.value != LoginLoad.NONE && LoginLoad.isSpotifyAccounts(request.url.toString()) &&
+                // A failed main-frame sign-in at Google, Facebook or Apple needs the same recoverable
+                // error screen as Spotify's own login; the previous check only covered accounts.spotify.com.
+                if (request.isForMainFrame && _loginLoad.value != LoginLoad.NONE && isLoginPage(request.url.toString()) &&
                     "ERR_ABORTED" !in error.description.toString())
-                    loginFailed("load error ${error.errorCode}")
+                    loginFailed("load error ${error.errorCode} at ${request.url.host}")
             }
 
             override fun onReceivedHttpError(view: WebView, request: WebResourceRequest, response: WebResourceResponse) {
@@ -403,8 +404,8 @@ class WebPlayerHost(private val context: Context) : BridgeHost {
                         licence = request.url.path?.let { it.contains("widevine-license") || it.endsWith("/license_url") } == true)
                 if (request.isForMainFrame && request.url.host == PLAYER_HOST && (response.statusCode >= 500 || response.statusCode == 429))
                     playerPageFailed("http ${response.statusCode}")
-                if (request.isForMainFrame && _loginLoad.value != LoginLoad.NONE && LoginLoad.isSpotifyAccounts(request.url.toString()) && response.statusCode >= 500)
-                    loginFailed("http ${response.statusCode}")
+                if (request.isForMainFrame && _loginLoad.value != LoginLoad.NONE && isLoginPage(request.url.toString()) && response.statusCode >= 500)
+                    loginFailed("http ${response.statusCode} at ${request.url.host}")
                 if (request.url.path?.contains("widevine-license") == true) {
                     if (response.statusCode == 429) onLicenseLimited()
                     else if (response.statusCode in 400..499) licenceRefusedAt = android.os.SystemClock.elapsedRealtime()
@@ -659,12 +660,20 @@ class WebPlayerHost(private val context: Context) : BridgeHost {
     }
 
     /**
-     * "Try again" after the sign-in page failed: from nothing. A failed attempt may have left half
-     * a sign-in behind (the cookies and storage of a flow that never finished), and Spotify's page
-     * answers "Oops! Something went wrong" to a flow it cannot match with its own state.
+     * First sign-in retry keeps cookies and Web storage: a temporary WebView/network failure
+     * should not erase a partially completed Spotify or identity-provider sign-in.
+     */
+    fun retryLoginKeepingSession() = main.post {
+        beginLoginLoad()
+        Logbook.log("sign-in retry: keeping session")
+        view.loadUrl(LOGIN_URL)
+    }
+
+    /**
+     * Explicit fresh sign-in for a broken authorization flow. This removes this WebView profile's
+     * cookies and Web storage, so it must be a separate action rather than the default retry.
      */
     fun retryLogin() = main.post { beginLoginLoad(); cleanSlate { view.loadUrl(LOGIN_URL) } }
-
     /**
      * Before a report sent from the sign-in: what the page shows right now (its path, title, the
      * error messages on it, which kind of step), into the log. The failed sign-ins reported
