@@ -60,6 +60,7 @@ import com.music.spotui.ui.theme.AppSans
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -73,7 +74,7 @@ import kotlin.math.sin
  * the button rise into place one after the other, over a soft green light that drifts.
  */
 @Composable
-fun WelcomeScreen(onLogin: () -> Unit) {
+fun WelcomeScreen(onLogin: () -> Unit, onGuest: () -> Unit) {
     // One entrance per part, a beat apart: logo, name, features, button.
     val parts = remember { List(4) { Animatable(0f) } }
     LaunchedEffect(Unit) {
@@ -137,6 +138,17 @@ fun WelcomeScreen(onLogin: () -> Unit) {
                     Text(stringResource(R.string.welcome_login), color = Color.Black, fontFamily = AppSans,
                         fontWeight = FontWeight.Bold, fontSize = 17.sp)
                 }
+                Text(
+                    "Explorar como convidado",
+                    color = AppText, fontFamily = AppSans, fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.fillMaxWidth().padding(top = 14.dp)
+                        .clip(RoundedCornerShape(22.dp))
+                        .background(Color.White.copy(alpha = 0.10f))
+                        .clickable(onClick = onGuest)
+                        .padding(vertical = 14.dp),
+                    textAlign = TextAlign.Center,
+                )
                 Text(
                     stringResource(R.string.welcome_privacy),
                     color = AppText.copy(alpha = 0.5f), fontFamily = AppSans, fontSize = 13.sp, lineHeight = 18.sp,
